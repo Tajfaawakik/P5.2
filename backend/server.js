@@ -6,6 +6,7 @@ const authRoutes = require('./routes/auth.js');
 const labRoutes = require('./routes/lab.js'); 
 const karteRoutes = require('./routes/karte.js');
 const shindanRoutes = require('./routes/shindan.js'); 
+const togoRoutes = require('./routes/togo.js');
 
 const app = express();
 const PORT = 3001; // フロントエンドと競合しないポート
@@ -19,6 +20,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/labs', labRoutes);
 app.use('/api/karte', karteRoutes); 
 app.use('/api/shindan', shindanRoutes);
+app.use('/api/togo', togoRoutes); 
 
 app.listen(PORT, () => {
   console.log(`サーバーがポート${PORT}で起動しました。`);

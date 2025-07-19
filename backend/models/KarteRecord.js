@@ -10,6 +10,12 @@ class KarteRecord {
     console.log('Saved to mock DB (Karte):', newEntry);
     return newEntry;
   }
+
+  static async findByPatientId(patientId) {
+    // 実際にはpatientIdで絞り込む
+    console.log(`Finding from mock DB (Karte) by patientId: ${patientId}`);
+    return mockDatabase;
+  }
 }
 
 module.exports = KarteRecord;

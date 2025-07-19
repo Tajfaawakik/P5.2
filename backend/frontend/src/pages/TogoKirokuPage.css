@@ -1,0 +1,36 @@
+.togo-container {
+  padding: 1rem;
+}
+
+.togo-actions {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.togo-actions button {
+  padding: 10px 20px;
+  font-size: 1.1em;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: #27ae60;
+  color: white;
+}
+
+.togo-actions button:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.togo-output {
+  width: 100%;
+  height: calc(100vh - 200px);
+  padding: 15px;
+  font-family: monospace;
+  font-size: 1.1em;
+  line-height: 1.6;
+  background-color: #f6f6f6;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}

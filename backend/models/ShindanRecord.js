@@ -10,6 +10,12 @@ class ShindanRecord {
     console.log('Saved to mock DB (Shindan):', newEntry);
     return newEntry;
   }
+
+  static async findByPatientId(patientId) {
+    // 実際にはpatientIdで絞り込む
+    console.log(`Finding from mock DB (Shindan) by patientId: ${patientId}`);
+    return mockDatabase;
+  }
 }
 
 module.exports = ShindanRecord;
