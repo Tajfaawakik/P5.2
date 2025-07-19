@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import historiesData from '../data/histories.json';
 import medSuggestionsData from '../data/med_suggestions.json';
+import apiClient from '../api/apiClient'; // apiClientをインポート
 import './KartePage.css';
 
 // Barthel Indexの評価項目
@@ -70,6 +71,26 @@ function KartePage() {
     });
   };
 
+  // サーバーに保存する処理
+  const handleSave = async () => {
+    const dataToSave = {
+      patientInfo,
+      pastHistory,
+      medications,
+      barthelScores,
+      totalBarthelScore,
+      // patientId: '12345' // 将来的に患者IDも送る
+    };
+
+    try {
+      await apiClient.post('/karte', dataToSave);
+      alert('入力内容をサーバーに保存しました。');
+    } catch (error) {
+      console.error('保存に失敗しました', error);
+      alert('サーバーへの保存に失敗しました。');
+    }
+  };
+
   return (
     <div className="karte-container">
       <h2>カルテ記載支援 (App1)</h2>
@@ -125,6 +146,8 @@ function KartePage() {
         {/* 右側の出力エリア */}
         <div className="output-area">
           <div className="memo-actions">
+              {/* --- ▼▼▼ 「サーバーに保存」ボタンを追記 ▼▼▼ --- */}
+            <button onClick={handleSave}>サーバーに保存</button>
             <button onClick={generateMemo}>カルテ用メモを生成</button>
             <button onClick={copyMemo} disabled={!generatedMemo}>クリップボードにコピー</button>
           </div>

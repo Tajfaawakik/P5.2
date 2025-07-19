@@ -111,3 +111,27 @@ input[type="text"], input[type="number"], select, textarea {
   font-family: monospace;
   background-color: #f6f6f6;
 }
+
+/* ... (既存のスタイル) ... */
+
+.memo-actions button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  background-color: #3498db; /* ボタンの色を統一 */
+  color: white;
+  cursor: pointer;
+  font-size: 0.9em; /* 少しフォントを小さく */
+}
+
+/* 生成ボタンの色を緑に */
+.memo-actions button:nth-of-type(2) {
+  background-color: #27ae60;
+}
+
+
+.memo-actions button:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+}
+/* ... */
