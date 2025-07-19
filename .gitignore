@@ -1,0 +1,27 @@
+# # Mac/Windows OS固有のファイル
+.DS_Store
+Thumbs.db
+
+# # ログファイル
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# # 依存関係パッケージ
+# フロントエンドとバックエンド両方のnode_modulesを除外
+**/node_modules
+
+# # ビルド成果物
+**/build
+**/dist
+
+# # 環境変数ファイル (機密情報)
+# 全ての.envファイルを除外
+.env
+.env.*
+# ただし、テンプレートファイルは除外しない
+!.env.example
+
+# # エディタ設定
+.vscode/
