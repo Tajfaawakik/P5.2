@@ -1,0 +1,113 @@
+.karte-container {
+  padding: 1rem;
+}
+
+.karte-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.input-area, .output-area {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.input-area section {
+  margin-bottom: 25px;
+}
+
+.input-area h3 {
+  margin-top: 0;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+input[type="text"], input[type="number"], select, textarea {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.button-group button {
+  padding: 5px 10px;
+  border: 1px solid #3498db;
+  background-color: #fff;
+  color: #3498db;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.button-group button.active {
+  background-color: #3498db;
+  color: #fff;
+}
+
+.button-group button.suggestion {
+  border-style: dashed;
+  border-color: #95a5a6;
+  color: #7f8c8d;
+}
+
+.suggestion-guide {
+  margin: 0 0 5px 0;
+  font-size: 0.9em;
+  color: #7f8c8d;
+}
+
+.med-row {
+  display: flex;
+  gap: 10px;
+}
+
+.adl-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+.adl-row label {
+  font-weight: 500;
+}
+.adl-row select {
+  width: auto;
+  margin-bottom: 0;
+}
+
+.memo-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.memo-actions button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  background-color: #27ae60;
+  color: white;
+  cursor: pointer;
+}
+
+.memo-actions button:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.memo-output {
+  height: calc(100vh - 200px);
+  font-family: monospace;
+  background-color: #f6f6f6;
+}
