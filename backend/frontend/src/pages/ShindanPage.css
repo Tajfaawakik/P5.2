@@ -145,3 +145,26 @@
     border-radius: 12px;
     font-size: 0.9em;
 }
+
+/* ... 既存のスタイル ... */
+.output-generation-area .memo-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+.output-generation-area .memo-actions button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    background-color: #3498db;
+    color: white;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+.output-generation-area .memo-actions button:nth-of-type(2) {
+    background-color: #27ae60;
+}
+.output-generation-area .memo-actions button:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+}

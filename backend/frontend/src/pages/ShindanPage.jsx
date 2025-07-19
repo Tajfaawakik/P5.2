@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import medicalData from '../data/medicalData.json';
 import symptomKeywords from '../data/symptomKeywords.json';
+import apiClient from '../api/apiClient';
 import './ShindanPage.css';
 
 // --- ▼▼▼ InteractiveTextコンポーネントを修正 ▼▼▼ ---
@@ -79,9 +80,7 @@ function ShindanPage() {
     let text = `【主訴・症候】\n- ${selectedSymptoms.join(', ')}\n\n`;
     text += `【鑑別疾患】\n`;
     Object.entries(checkedDiagnoses).forEach(([name, isChecked]) => {
-      if (isChecked) {
-        text += `- ${name}\n`;
-      }
+      if (isChecked) { text += `- ${name}\n`; }
     });
     text += `\n【キーワード】\n- ${selectedKeywords.join(', ')}\n`;
     setGeneratedText(text);
@@ -89,6 +88,23 @@ function ShindanPage() {
 
   const copyText = () => {
     navigator.clipboard.writeText(generatedText).then(() => alert('記録用テキストをコピーしました。'));
+  };
+
+  // サーバーに診断記録を保存する処理
+  const handleSave = async () => {
+    const dataToSave = {
+      selectedSymptoms,
+      checkedDiagnoses,
+      selectedKeywords,
+      // patientId: '12345' // 将来的に患者IDも送る
+    };
+    try {
+      await apiClient.post('/shindan', dataToSave);
+      alert('診断記録をサーバーに保存しました。');
+    } catch (error) {
+      console.error('保存に失敗しました', error);
+      alert('サーバーへの保存に失敗しました。');
+    }
   };
 
   const unpinnedDiagnoses = differentialDiagnoses.filter(d => !pinnedDiagnoses.some(pd => pd.name === d.name));
@@ -132,6 +148,7 @@ function ShindanPage() {
             </div>
             <h3>記録用テキスト</h3>
             <div className="memo-actions">
+              <button onClick={handleSave}>サーバーに保存</button>
                 <button onClick={generateText}>テキスト生成</button>
                 <button onClick={copyText} disabled={!generatedText}>コピー</button>
             </div>
