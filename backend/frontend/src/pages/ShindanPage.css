@@ -1,0 +1,89 @@
+.shindan-container {
+  padding: 1rem;
+}
+
+.shindan-grid {
+  display: grid;
+  grid-template-columns: 250px 2fr 1fr;
+  gap: 20px;
+  height: calc(100vh - 120px);
+}
+
+.symptom-selection-area, .diagnosis-display-area, .output-generation-area {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow-y: auto;
+}
+
+.symptom-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.symptom-buttons button {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #bdc3c7;
+  background-color: #fff;
+  border-radius: 4px;
+  text-align: left;
+  cursor: pointer;
+}
+.symptom-buttons button.active {
+  background-color: #3498db;
+  color: white;
+  border-color: #3498db;
+}
+
+.diagnosis-card {
+  border: 1px solid #ecf0f1;
+  border-radius: 5px;
+  margin-bottom: 15px;
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #f8f9f9;
+  padding: 10px;
+}
+.card-header h4 {
+  margin: 0;
+  flex-grow: 1;
+}
+.pin-button {
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  cursor: pointer;
+  color: #f39c12;
+}
+
+.card-body {
+  padding: 10px;
+}
+.card-body ul {
+  padding-left: 20px;
+  margin: 5px 0;
+}
+.keyword {
+  background-color: #fdeaa8;
+  border-radius: 3px;
+}
+
+.pinned-section {
+  margin-bottom: 20px;
+  border-bottom: 2px solid #f39c12;
+  padding-bottom: 10px;
+}
+
+.output-generation-area textarea {
+    width: 100%;
+    height: calc(100% - 100px);
+    font-family: monospace;
+    background-color: #f6f6f6;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
