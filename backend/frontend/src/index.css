@@ -66,3 +66,51 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* ▼▼▼ ここから下が重要 ▼▼▼ */
+
+  /* アプリ全体の背景色を少し落ち着いた色に設定 */
+  background-color: #f0f2f5;
+
+  /* アプリ全体のデフォルト文字色を読みやすい濃い色に設定 */
+  color: #2c3e50;
+}
+
+/* ボタンや入力欄の文字色もデフォルトで濃い色になるように保証 */
+input,
+select,
+textarea,
+button {
+  color: #2c3e50;
+}
+
+/* ======================================== */
+/* 入力フォームのスタイルを上書き          */
+/* ======================================== */
+
+input,
+select,
+textarea {
+  /* 背景色を白に固定 */
+  background-color: #fff !important; 
+  
+  /* 文字色を濃い色に固定 */
+  color: #2c3e50 !important;
+  
+  /* 境界線を設定して見やすくする */
+  border: 1px solid #bdc3c7;
+}
+
+/* 異常値を示す入力欄は、このスタイルをさらに上書きする */
+input.abnormal {
+  background-color: #fdd !important; /* 薄い赤色 */
+  color: #c0392b !important;
+}
