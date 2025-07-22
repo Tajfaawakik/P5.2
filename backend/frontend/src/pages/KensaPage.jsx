@@ -13,7 +13,9 @@ function KensaPage() {
     const fetchHistoricalData = async () => {
       try {
         const response = await apiClient.get(`/labs/${patientId}`);
-        setHistoricalData(response.data);
+        // --- ▼▼▼ BUG FIX 1: 正しいソート順（新しい順）に修正 ▼▼▼ ---
+        const sortedData = response.data.sort((a, b) => new Date(b.test_date) - new Date(a.test_date));
+        setHistoricalData(sortedData);
       } catch (error) {
         console.error('履歴の取得に失敗しました', error);
       }
@@ -32,15 +34,15 @@ function KensaPage() {
       return;
     }
 
-    // 最新の履歴を取得
-    const latestRecord = historicalData.length > 0 ? historicalData[historicalData.length - 1] : null;
+    // --- ▼▼▼ BUG FIX 2: 最新の履歴を正しく参照するように修正 ▼▼▼ ---
+    const latestRecord = historicalData.length > 0 ? historicalData[0] : null;
+
 
     // シナリオ1: 前回値があれば引用する
     if (latestRecord && latestRecord.results && latestRecord.results[id] !== undefined) {
       handleInputChange(id, latestRecord.results[id]);
       return;
     }
-
     // シナリオ2: 前回値がなければ、標準値を計算して入力する
     if (min !== undefined && max !== undefined) {
       const normalValue = Math.round(((min + max) / 2) * 100) / 100;
@@ -48,27 +50,23 @@ function KensaPage() {
     }
   };
 
-  // // キーボードのキーが押されたときの処理
-  // const handleKeyDown = (e, item) => {
-  //   // 入力欄が空の場合のみ、この機能は動作する
-  //   if (e.target.value === '') {
-  //     if (e.key === 'ArrowUp') {
-  //       e.preventDefault(); // デフォルトの動作（カーソル移動など）をキャンセル
-  //       handleInputChange(item.id, item.max); // 上限値をセット
-  //     } else if (e.key === 'ArrowDown') {
-  //       e.preventDefault();
-  //       handleInputChange(item.id, item.min); // 下限値をセット
-  //     }
-  //   }
-  // };
+  // キーボードのキーが押されたときの処理
+  const handleKeyDown = (e, item) => {
+    if (e.target.value === '') {
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        handleInputChange(item.id, item.max);
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        handleInputChange(item.id, item.min);
+      }
+    }
+  };
 
   const groupedItems = useMemo(() => {
-    // (この部分は変更なし)
     return testItemsData.reduce((acc, item) => {
       const category = item.category;
-      if (!acc[category]) {
-        acc[category] = [];
-      }
+      if (!acc[category]) acc[category] = [];
       acc[category].push(item);
       return acc;
     }, {});
@@ -79,7 +77,6 @@ function KensaPage() {
   };
 
   const isAbnormal = (item, value) => {
-    // (この部分は変更なし)
     const numValue = parseFloat(value);
     if (isNaN(numValue)) return false;
     return numValue < item.min || numValue > item.max;
@@ -128,7 +125,7 @@ function KensaPage() {
                     value={labResults[item.id] || ''}
                     onChange={(e) => handleInputChange(item.id, e.target.value)}
                     onFocus={(e) => handleInputFocus(e, item)} // <<<--- onFocusイベントを追加
-                    // onKeyDown={(e) => handleKeyDown(e, item)} // <<<--- onKeyDownイベントを追加
+                    onKeyDown={(e) => handleKeyDown(e, item)} // <<<--- onKeyDownイベントを追加
                     className={isAbnormal(item, labResults[item.id]) ? 'abnormal' : ''}
                   />
                   <span>{item.unit}</span>
