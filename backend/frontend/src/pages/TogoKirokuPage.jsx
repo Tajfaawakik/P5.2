@@ -13,30 +13,34 @@ const formatRecord = (record) => {
 
   // App1: カルテ記載
   if (record.karteRecords && record.karteRecords.length > 0) {
-    const rec = record.karteRecords[record.karteRecords.length - 1]; // 最新の記録を取得
+    const rec = record.karteRecords[0]; // 最新の記録を取得
+    // --- ▼▼▼ ここから修正 ▼▼▼ ---
     text += "【カルテ情報 (App1)】\n";
-    text += `氏名: ${rec.patientInfo.name}, 年齢: ${rec.patientInfo.age}, 性別: ${rec.patientInfo.sex}\n`;
-    text += `既往歴: ${rec.pastHistory.selected.join(', ')} (${rec.pastHistory.freeText})\n`;
-    text += `ADL合計: ${rec.totalBarthelScore}点\n`;
+    text += `氏名: ${rec.record_data.patientInfo.name}, 年齢: ${rec.record_data.patientInfo.age}, 性別: ${rec.record_data.patientInfo.sex}\n`;
+    text += `既往歴: ${rec.record_data.pastHistory.selected.join(', ')} (${rec.record_data.pastHistory.freeText})\n`;
+    text += `ADL合計: ${rec.record_data.totalBarthelScore}点\n`;
+    // --- ▲▲▲ ここまで修正 ▲▲▲ ---
     text += "\n";
   }
 
   // App2: 症候鑑別
   if (record.shindanRecords && record.shindanRecords.length > 0) {
-    const rec = record.shindanRecords[record.shindanRecords.length - 1]; // 最新の記録
+    const rec = record.shindanRecords[0]; // 最新の記録
+    // --- ▼▼▼ ここから修正 ▼▼▼ ---
     text += "【症候鑑別 (App2)】\n";
-    text += `症候: ${rec.selectedSymptoms.join(', ')}\n`;
-    const checked = Object.keys(rec.checkedDiagnoses).filter(k => rec.checkedDiagnoses[k]);
+    text += `症候: ${rec.record_data.selectedSymptoms.join(', ')}\n`;
+    const checked = Object.keys(rec.record_data.checkedDiagnoses).filter(k => rec.record_data.checkedDiagnoses[k]);
     text += `チェックした鑑別: ${checked.join(', ')}\n`;
-    text += `選択したキーワード: ${rec.selectedKeywords.join(', ')}\n`;
+    text += `選択したキーワード: ${rec.record_data.selectedKeywords.join(', ')}\n`;
+    // --- ▲▲▲ ここまで修正 ▲▲▲ ---
     text += "\n";
   }
 
-  // App3: 採血結果
+  // App3: 採血結果 (この部分は元々正しいため修正なし)
   if (record.labResults && record.labResults.length > 0) {
     text += "【採血結果 (App3)】\n";
     record.labResults.forEach(rec => {
-      text += `検査日: ${rec.testDate}\n`;
+      text += `検査日: ${rec.test_date}\n`;
       text += `  WBC: ${rec.results.wbc || '-'}, RBC: ${rec.results.rbc || '-'}, Hb: ${rec.results.hb || '-'}\n`;
     });
     text += "\n";
@@ -45,10 +49,11 @@ const formatRecord = (record) => {
   return text;
 };
 
+
 function TogoKirokuPage() {
   const [recordText, setRecordText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const patientId = '12345'; // 将来的に動的にする
+  const patientId = '12345';
 
   const fetchAndFormatRecord = async () => {
     setIsLoading(true);
