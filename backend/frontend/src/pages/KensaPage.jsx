@@ -21,6 +21,47 @@ function KensaPage() {
     fetchHistoricalData();
   }, [patientId]);
 
+  // 入力欄がフォーカスされたときの処理
+  const handleInputFocus = (e, item) => {
+    const { id, min, max } = item;
+    const currentValue = labResults[id];
+
+    // シナリオ3: 既に入力値があれば、その値を全選択する
+    if (currentValue !== undefined && currentValue !== '') {
+      e.target.select();
+      return;
+    }
+
+    // 最新の履歴を取得
+    const latestRecord = historicalData.length > 0 ? historicalData[historicalData.length - 1] : null;
+
+    // シナリオ1: 前回値があれば引用する
+    if (latestRecord && latestRecord.results && latestRecord.results[id] !== undefined) {
+      handleInputChange(id, latestRecord.results[id]);
+      return;
+    }
+
+    // シナリオ2: 前回値がなければ、標準値を計算して入力する
+    if (min !== undefined && max !== undefined) {
+      const normalValue = Math.round(((min + max) / 2) * 100) / 100;
+      handleInputChange(id, normalValue);
+    }
+  };
+
+  // // キーボードのキーが押されたときの処理
+  // const handleKeyDown = (e, item) => {
+  //   // 入力欄が空の場合のみ、この機能は動作する
+  //   if (e.target.value === '') {
+  //     if (e.key === 'ArrowUp') {
+  //       e.preventDefault(); // デフォルトの動作（カーソル移動など）をキャンセル
+  //       handleInputChange(item.id, item.max); // 上限値をセット
+  //     } else if (e.key === 'ArrowDown') {
+  //       e.preventDefault();
+  //       handleInputChange(item.id, item.min); // 下限値をセット
+  //     }
+  //   }
+  // };
+
   const groupedItems = useMemo(() => {
     // (この部分は変更なし)
     return testItemsData.reduce((acc, item) => {
@@ -86,6 +127,8 @@ function KensaPage() {
                     step={item.step}
                     value={labResults[item.id] || ''}
                     onChange={(e) => handleInputChange(item.id, e.target.value)}
+                    onFocus={(e) => handleInputFocus(e, item)} // <<<--- onFocusイベントを追加
+                    // onKeyDown={(e) => handleKeyDown(e, item)} // <<<--- onKeyDownイベントを追加
                     className={isAbnormal(item, labResults[item.id]) ? 'abnormal' : ''}
                   />
                   <span>{item.unit}</span>
