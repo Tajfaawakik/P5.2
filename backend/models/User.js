@@ -1,30 +1,30 @@
-// ここでは、PostgreSQLに接続するための 'pg' ライブラリのプール機能を想定しています。
-// 実際のデータベース接続設定は server.js などで行います。
+// データベース接続設定をインポート
+const db = require('../config/db.js');
+const bcrypt = require('bcryptjs');
 
 class User {
-  // 新しいユーザーを作成
+  // 新しいユーザーを作成し、データベースに保存
   static async create(username, passwordHash) {
-    // const result = await pool.query(
-    //   'INSERT INTO users (username, password) VALUES ($1, $2) RETURNING *',
-    //   [username, passwordHash]
-    // );
-    // return result.rows[0];
-    console.log(`User created (mock): ${username}`);
-    // モックアップ：実際にはデータベースに保存します
-    return { id: 1, username: username };
+    try {
+      const sql = 'INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id, username';
+      const result = await db.query(sql, [username, passwordHash]);
+      return result.rows[0]; // 挿入されたユーザー情報を返す
+    } catch (error) {
+      console.error('Error creating user:', error);
+      throw error;
+    }
   }
 
-  // ユーザー名でユーザーを検索
+  // ユーザー名でユーザーをデータベースから検索
   static async findByUsername(username) {
-    // const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
-    // return result.rows[0];
-    console.log(`Finding user (mock): ${username}`);
-    // モックアップ：実際にはデータベースから取得します
-    if (username === 'testuser') {
-      // bcrypt.hash('password123', 10) で生成したハッシュの例
-      return { id: 1, username: 'testuser', password: '$2a$10$f/U.G5g.3WzDG..L51r4d.y/x0BCW4dot/lJ29xJgfqyJ.kG8/CLe' };
+    try {
+      const sql = 'SELECT * FROM users WHERE username = $1';
+      const result = await db.query(sql, [username]);
+      return result.rows[0]; // 見つかったユーザー情報（またはundefined）を返す
+    } catch (error) {
+      console.error('Error finding user by username:', error);
+      throw error;
     }
-    return null;
   }
 }
 
