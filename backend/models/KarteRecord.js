@@ -3,14 +3,12 @@ const db = require('../config/db.js');
 
 class KarteRecord {
   // カルテ記録をデータベースに保存
-  static async save(karteData) {
+  static async save(patientId, karteData) { // <<<--- 引数で受け取る
     try {
-      // patientIdは将来的に動的にするが、今は固定値を入れる
-      const patientId = '12345';
       const sql = 'INSERT INTO karte_records (patient_id, record_data) VALUES ($1, $2) RETURNING *';
-      const result = await db.query(sql, [patientId, karteData]);
+      const result = await db.query(sql, [patientId, karteData]); // <<<--- 受け取った値を使用
       return result.rows[0];
-    } catch (error) {
+    }  catch (error) {
       console.error('Error saving karte record:', error);
       throw error;
     }

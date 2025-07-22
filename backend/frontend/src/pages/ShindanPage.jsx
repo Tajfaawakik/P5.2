@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { usePatient } from '../context/PatientContext.jsx';
 import medicalData from '../data/medicalData.json';
 import symptomKeywords from '../data/symptomKeywords.json';
 import apiClient from '../api/apiClient';
@@ -33,6 +34,7 @@ const InteractiveText = ({ text, selectedKeywords, onKeywordClick }) => {
 
 
 function ShindanPage() {
+  const { currentPatient } = usePatient(); // <<<--- グローバルな患者情報を取得
   const [selectedSymptoms, setSelectedSymptoms] = useState([]);
   const [checkedDiagnoses, setCheckedDiagnoses] = useState({});
   const [pinnedDiagnoses, setPinnedDiagnoses] = useState([]);
@@ -93,10 +95,12 @@ function ShindanPage() {
   // サーバーに診断記録を保存する処理
   const handleSave = async () => {
     const dataToSave = {
-      selectedSymptoms,
-      checkedDiagnoses,
-      selectedKeywords,
-      // patientId: '12345' // 将来的に患者IDも送る
+      patientId: currentPatient.patient_id, // <<<--- 選択中の患者IDを使用
+      recordData: { // <<<--- record_dataでラップ
+        selectedSymptoms,
+        checkedDiagnoses,
+        selectedKeywords,
+      }
     };
     try {
       await apiClient.post('/shindan', dataToSave);
@@ -108,6 +112,10 @@ function ShindanPage() {
   };
 
   const unpinnedDiagnoses = differentialDiagnoses.filter(d => !pinnedDiagnoses.some(pd => pd.name === d.name));
+
+  if (!currentPatient) {
+    return <div className="page-prompt">患者を選択してください。</div>;
+  }
 
   return (
     <div className="shindan-container">

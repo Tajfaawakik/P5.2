@@ -1,42 +1,40 @@
 import React, { useState } from 'react';
+import { usePatient } from '../context/PatientContext.jsx'; // usePatientをインポート
 import apiClient from '../api/apiClient';
 import './TogoKirokuPage.css';
 
-// 取得したデータを整形してテキスト化する関数
-const formatRecord = (record) => {
+// --- ▼▼▼ 修正点1: 引数にpatientを追加 ▼▼▼ ---
+const formatRecord = (record, patient) => {
   if (!record) return "データを取得できませんでした。";
   let text = "--- 救急初診 統合記録 ---\n\n";
-  const patientId = '12345'; // 固定
-  text += `患者ID: ${patientId}\n`;
+  
+  // --- ▼▼▼ 修正点2: 引数のpatient情報を使用 ▼▼▼ ---
+  if (patient) {
+    text += `患者ID: ${patient.patient_id}\n`;
+    text += `氏名: ${patient.name}\n`;
+  }
+  
   text += `記録日時: ${new Date().toLocaleString('ja-JP')}\n`;
   text += "======================\n\n";
 
-  // App1: カルテ記載
+  // ... (残りの整形ロジックは変更なし)
   if (record.karteRecords && record.karteRecords.length > 0) {
-    const rec = record.karteRecords[0]; // 最新の記録を取得
-    // --- ▼▼▼ ここから修正 ▼▼▼ ---
+    const rec = record.karteRecords[0];
     text += "【カルテ情報 (App1)】\n";
     text += `氏名: ${rec.record_data.patientInfo.name}, 年齢: ${rec.record_data.patientInfo.age}, 性別: ${rec.record_data.patientInfo.sex}\n`;
     text += `既往歴: ${rec.record_data.pastHistory.selected.join(', ')} (${rec.record_data.pastHistory.freeText})\n`;
     text += `ADL合計: ${rec.record_data.totalBarthelScore}点\n`;
-    // --- ▲▲▲ ここまで修正 ▲▲▲ ---
     text += "\n";
   }
-
-  // App2: 症候鑑別
   if (record.shindanRecords && record.shindanRecords.length > 0) {
-    const rec = record.shindanRecords[0]; // 最新の記録
-    // --- ▼▼▼ ここから修正 ▼▼▼ ---
+    const rec = record.shindanRecords[0];
     text += "【症候鑑別 (App2)】\n";
     text += `症候: ${rec.record_data.selectedSymptoms.join(', ')}\n`;
     const checked = Object.keys(rec.record_data.checkedDiagnoses).filter(k => rec.record_data.checkedDiagnoses[k]);
     text += `チェックした鑑別: ${checked.join(', ')}\n`;
-    text += `選択したキーワード: ${rec.record_data.selectedKeywords.join(', ')}\n`;
-    // --- ▲▲▲ ここまで修正 ▲▲▲ ---
+    text += `キーワード: ${rec.record_data.selectedKeywords.join(', ')}\n`;
     text += "\n";
   }
-
-  // App3: 採血結果 (この部分は元々正しいため修正なし)
   if (record.labResults && record.labResults.length > 0) {
     text += "【採血結果 (App3)】\n";
     record.labResults.forEach(rec => {
@@ -45,21 +43,26 @@ const formatRecord = (record) => {
     });
     text += "\n";
   }
-
   return text;
 };
 
 
 function TogoKirokuPage() {
+  const { currentPatient } = usePatient(); // currentPatientを取得
   const [recordText, setRecordText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const patientId = '12345';
+  // const patientId = '12345'; // この行は不要
 
   const fetchAndFormatRecord = async () => {
+    if (!currentPatient) {
+      alert('先に患者を選択してください。');
+      return;
+    }
     setIsLoading(true);
     try {
-      const response = await apiClient.get(`/togo/${patientId}`);
-      const formatted = formatRecord(response.data);
+      const response = await apiClient.get(`/togo/${currentPatient.patient_id}`);
+      // --- ▼▼▼ 修正点3: currentPatientを関数に渡す ▼▼▼ ---
+      const formatted = formatRecord(response.data, currentPatient);
       setRecordText(formatted);
     } catch (error) {
       console.error('統合記録の取得に失敗しました', error);
@@ -72,6 +75,10 @@ function TogoKirokuPage() {
   const copyText = () => {
     navigator.clipboard.writeText(recordText).then(() => alert('統合記録をコピーしました。'));
   };
+  
+  if (!currentPatient) {
+    return <div className="page-prompt">患者を選択してください。</div>;
+  }
 
   return (
     <div className="togo-container">

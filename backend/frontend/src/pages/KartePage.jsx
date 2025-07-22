@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { usePatient } from '../context/PatientContext.jsx';
 import historiesData from '../data/histories.json';
 import medSuggestionsData from '../data/med_suggestions.json';
 import apiClient from '../api/apiClient'; // apiClientをインポート
@@ -19,6 +20,7 @@ const barthelItems = [
 ];
 
 function KartePage() {
+  const { currentPatient } = usePatient(); // <<<--- グローバルな患者情報を取得
   const [patientInfo, setPatientInfo] = useState({ name: '', age: '', sex: '男性' });
   const [pastHistory, setPastHistory] = useState({ selected: [], freeText: '' });
   const [medications, setMedications] = useState([{ name: '', dose: '' }]);
@@ -74,14 +76,15 @@ function KartePage() {
   // サーバーに保存する処理
   const handleSave = async () => {
     const dataToSave = {
-      patientInfo,
-      pastHistory,
-      medications,
-      barthelScores,
-      totalBarthelScore,
-      // patientId: '12345' // 将来的に患者IDも送る
+      patientId: currentPatient.patient_id, // <<<--- 選択中の患者IDを使用
+      recordData: { // <<<--- record_dataでラップ
+        patientInfo,
+        pastHistory,
+        medications,
+        barthelScores,
+        totalBarthelScore,
+      }
     };
-
     try {
       await apiClient.post('/karte', dataToSave);
       alert('入力内容をサーバーに保存しました。');
@@ -90,6 +93,13 @@ function KartePage() {
       alert('サーバーへの保存に失敗しました。');
     }
   };
+  
+  
+  // ▼▼▼ 患者が選択されていない場合はメッセージを表示 ▼▼▼
+  if (!currentPatient) {
+    return <div className="page-prompt">患者を選択してください。</div>;
+  }
+
 
   return (
     <div className="karte-container">

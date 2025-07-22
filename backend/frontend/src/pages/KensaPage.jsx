@@ -1,19 +1,26 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { usePatient } from '../context/PatientContext.jsx';
 import testItemsData from '../data/test_items.json';
 import apiClient from '../api/apiClient'; // APIクライアントをインポート
 import './KensaPage.css';
 
 function KensaPage() {
+  const { currentPatient } = usePatient(); // <<<--- グローバルな患者情報を取得
   const [labResults, setLabResults] = useState({});
   const [historicalData, setHistoricalData] = useState([]); // 履歴データ用のstate
-  const patientId = '12345'; // 患者IDを固定（将来的に動的にする）
+  // const patientId = '12345'; // 患者IDを固定（将来的に動的にする）
 
   // 初回レンダリング時またはpatientId変更時に過去のデータを取得
   useEffect(() => {
+    // 患者が選択されていない場合は何もしない
+    if (!currentPatient?.patient_id) {
+        setHistoricalData([]); // 患者がいない場合は履歴をクリア
+        return;
+    }
+
     const fetchHistoricalData = async () => {
       try {
-        const response = await apiClient.get(`/labs/${patientId}`);
-        // --- ▼▼▼ BUG FIX 1: 正しいソート順（新しい順）に修正 ▼▼▼ ---
+        const response = await apiClient.get(`/labs/${currentPatient.patient_id}`);
         const sortedData = response.data.sort((a, b) => new Date(b.test_date) - new Date(a.test_date));
         setHistoricalData(sortedData);
       } catch (error) {
@@ -21,7 +28,7 @@ function KensaPage() {
       }
     };
     fetchHistoricalData();
-  }, [patientId]);
+  }, [currentPatient]); // <<<--- currentPatientが変更されたら再実行
 
   // 入力欄がフォーカスされたときの処理
   const handleInputFocus = (e, item) => {
@@ -85,8 +92,8 @@ function KensaPage() {
   // 保存ボタンの処理をAPI通信に書き換え
   const handleSave = async () => {
     const dataToSave = {
-      patientId: patientId,
-      testDate: new Date().toISOString().split('T')[0], // 今日の日付
+      patientId: currentPatient.patient_id,
+      testDate: new Date().toISOString().split('T')[0],
       results: labResults,
     };
 
@@ -102,11 +109,15 @@ function KensaPage() {
     }
   };
 
+  if (!currentPatient) {
+    return <div className="page-prompt">患者を選択してください。</div>;
+  }
+
   return (
     <div className="kensa-container">
       <h2>採血結果入力 (App3)</h2>
       <div className="patient-info-bar">
-        <span>患者ID: {patientId}</span>
+        <span>患者ID: {currentPatient?.patient_id}</span>
         <button onClick={handleSave} className="save-button">この内容で保存</button>
       </div>
       <div className="results-grid">

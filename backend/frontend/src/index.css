@@ -114,3 +114,10 @@ input.abnormal {
   background-color: #fdd !important; /* 薄い赤色 */
   color: #c0392b !important;
 }
+
+.page-prompt {
+  padding: 40px;
+  text-align: center;
+  font-size: 1.2em;
+  color: #7f8c8d;
+}
