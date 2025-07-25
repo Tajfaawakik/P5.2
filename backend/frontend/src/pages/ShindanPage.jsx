@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react'; // <<<--- useEffectをインポート
 import { usePatient } from '../context/PatientContext.jsx';
 import medicalData from '../data/medicalData.json';
 import symptomKeywords from '../data/symptomKeywords.json';
@@ -32,6 +32,11 @@ const InteractiveText = ({ text, selectedKeywords, onKeywordClick }) => {
   );
 };
 
+// フォームの初期状態を定義
+const initialSelectedSymptoms = [];
+const initialCheckedDiagnoses = {};
+const initialPinnedDiagnoses = [];
+const initialSelectedKeywords = [];
 
 function ShindanPage() {
   const { currentPatient } = usePatient(); // <<<--- グローバルな患者情報を取得
@@ -40,6 +45,35 @@ function ShindanPage() {
   const [pinnedDiagnoses, setPinnedDiagnoses] = useState([]);
   const [selectedKeywords, setSelectedKeywords] = useState([]); // <<<--- キーワード選択状態を追加
   const [generatedText, setGeneratedText] = useState('');
+
+  // 患者が変更されたときにデータを取得する
+  useEffect(() => {
+    const resetForm = () => {
+      setSelectedSymptoms(initialSelectedSymptoms);
+      setCheckedDiagnoses(initialCheckedDiagnoses);
+      setPinnedDiagnoses(initialPinnedDiagnoses);
+      setSelectedKeywords(initialSelectedKeywords);
+      setGeneratedText('');
+    };
+
+    if (currentPatient) {
+      apiClient.get(`/shindan/${currentPatient.patient_id}`)
+        .then(response => {
+          const data = response.data.record_data;
+          setSelectedSymptoms(data.selectedSymptoms || initialSelectedSymptoms);
+          setCheckedDiagnoses(data.checkedDiagnoses || initialCheckedDiagnoses);
+          setSelectedKeywords(data.selectedKeywords || initialSelectedKeywords);
+          // ピン留め情報は毎回リセットする仕様とします
+          setPinnedDiagnoses(initialPinnedDiagnoses);
+        })
+        .catch(error => {
+          console.log(`患者 ${currentPatient.patient_id} の診断記録はありません。`);
+          resetForm();
+        });
+    } else {
+      resetForm();
+    }
+  }, [currentPatient]);
 
   const differentialDiagnoses = useMemo(() => {
     if (selectedSymptoms.length === 0) return [];

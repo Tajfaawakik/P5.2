@@ -6,4 +6,7 @@ const karteController = require('../controllers/karteController.js');
 // POST /api/karte
 router.post('/', karteController.saveKarteRecord);
 
+// GET /api/karte/:patientId - 特定患者の最新記録を取得
+router.get('/:patientId', karteController.getLatestKarteRecord);
+
 module.exports = router;

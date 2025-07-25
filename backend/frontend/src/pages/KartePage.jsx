@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react'; // <<<--- useEffectをインポート
 import { usePatient } from '../context/PatientContext.jsx';
 import historiesData from '../data/histories.json';
 import medSuggestionsData from '../data/med_suggestions.json';
@@ -19,6 +19,12 @@ const barthelItems = [
   { id: 'bladder', label: '排尿コントロール', points: [10, 5, 0] },
 ];
 
+// フォームの初期状態を定義
+const initialPatientInfo = { name: '', age: '', sex: '男性' };
+const initialPastHistory = { selected: [], freeText: '' };
+const initialMedications = [{ name: '', dose: '' }];
+const initialBarthelScores = {};
+
 function KartePage() {
   const { currentPatient } = usePatient(); // <<<--- グローバルな患者情報を取得
   const [patientInfo, setPatientInfo] = useState({ name: '', age: '', sex: '男性' });
@@ -26,6 +32,38 @@ function KartePage() {
   const [medications, setMedications] = useState([{ name: '', dose: '' }]);
   const [barthelScores, setBarthelScores] = useState({});
   const [generatedMemo, setGeneratedMemo] = useState('');
+
+  // 患者が変更されたときにデータを取得する
+  useEffect(() => {
+    // フォームをリセットする関数
+    const resetForm = () => {
+      setPatientInfo(initialPatientInfo);
+      setPastHistory(initialPastHistory);
+      setMedications(initialMedications);
+      setBarthelScores(initialBarthelScores);
+      setGeneratedMemo('');
+    };
+
+    if (currentPatient) {
+      apiClient.get(`/karte/${currentPatient.patient_id}`)
+        .then(response => {
+          // データがあればフォームにセット
+          const data = response.data.record_data;
+          setPatientInfo(data.patientInfo || initialPatientInfo);
+          setPastHistory(data.pastHistory || initialPastHistory);
+          setMedications(data.medications && data.medications.length > 0 ? data.medications : initialMedications);
+          setBarthelScores(data.barthelScores || initialBarthelScores);
+        })
+        .catch(error => {
+          // データがなければ(404 Not Found)、フォームをリセット
+          console.log(`患者 ${currentPatient.patient_id} のカルテ記録はありません。`);
+          resetForm();
+        });
+    } else {
+      // 患者が選択されていない場合もリセット
+      resetForm();
+    }
+  }, [currentPatient]); // currentPatientが変わるたびに実行
 
   // 既往歴ボタンのクリック処理
   const toggleHistory = (history) => {
@@ -109,9 +147,9 @@ function KartePage() {
         <div className="input-area">
           {/* 患者情報 */}
           <section><h3>患者基本情報</h3>
-            <input type="text" placeholder="氏名" onChange={e => setPatientInfo({...patientInfo, name: e.target.value})} />
-            <input type="number" placeholder="年齢" onChange={e => setPatientInfo({...patientInfo, age: e.target.value})} />
-            <select onChange={e => setPatientInfo({...patientInfo, sex: e.target.value})}>
+            <input type="text" placeholder="氏名" value={patientInfo.name} onChange={e => setPatientInfo({...patientInfo, name: e.target.value})} />
+            <input type="number" placeholder="年齢" value={patientInfo.age} onChange={e => setPatientInfo({...patientInfo, age: e.target.value})} />
+            <select value={patientInfo.sex} onChange={e => setPatientInfo({...patientInfo, sex: e.target.value})}>
               <option>男性</option><option>女性</option>
             </select>
           </section>
@@ -122,7 +160,7 @@ function KartePage() {
                 <button key={h} onClick={() => toggleHistory(h)} className={pastHistory.selected.includes(h) ? 'active' : ''}>{h}</button>
               )}
             </div>
-            <textarea placeholder="手術歴など自由記述" rows="2" onChange={e => setPastHistory({...pastHistory, freeText: e.target.value})}></textarea>
+            <textarea placeholder="手術歴など自由記述" rows="2" value={pastHistory.freeText} onChange={e => setPastHistory({...pastHistory, freeText: e.target.value})}></textarea>
           </section>
           {/* 内服薬 */}
           <section><h3>内服薬</h3>
@@ -145,7 +183,7 @@ function KartePage() {
             {barthelItems.map(item => (
               <div key={item.id} className="adl-row">
                 <label>{item.label}</label>
-                <select onChange={e => setBarthelScores({...barthelScores, [item.id]: e.target.value})}>
+                <select value={barthelScores[item.id] || ''} onChange={e => setBarthelScores({...barthelScores, [item.id]: e.target.value})}>
                   <option value="">選択</option>
                   {item.points.map(p => <option key={p} value={p}>{p}点</option>)}
                 </select>

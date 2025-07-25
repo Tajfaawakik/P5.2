@@ -6,4 +6,8 @@ const shindanController = require('../controllers/shindanController.js');
 // POST /api/shindan
 router.post('/', shindanController.saveShindanRecord);
 
+// GET /api/shindan/:patientId - 特定患者の最新記録を取得
+router.get('/:patientId', shindanController.getLatestShindanRecord);
+
+
 module.exports = router;
