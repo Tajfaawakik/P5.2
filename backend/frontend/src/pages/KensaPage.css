@@ -109,3 +109,85 @@
   background-color: #f2f2f2;
   color: #333;
 }
+
+.medication-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: #f8f9f9;
+  border-radius: 4px;
+  min-height: 40px;
+}
+
+.med-tag {
+  background-color: #e0eaf4;
+  color: #2c3e50;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.9em;
+}
+
+.no-med-text {
+  color: #95a5a6;
+  font-size: 0.9em;
+  margin: auto 0;
+}
+
+.custom-med-input {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.custom-med-input input {
+  flex-grow: 1;
+  margin-bottom: 0;
+}
+
+.custom-med-input button {
+  white-space: nowrap;
+}
+
+/* 既存のボタンのスタイルが上書きされないように調整 */
+.button-group button.active {
+  background-color: #3498db;
+  color: #fff;
+}
+
+/* ... 既存のスタイル ... */
+.med-row {
+  display: flex;
+  gap: 10px;
+  align-items: center; /* ボタンと高さを合わせる */
+  margin-bottom: 10px; /* 各行の間隔 */
+}
+
+.med-row input {
+  margin-bottom: 0;
+}
+
+.med-row input:first-of-type {
+  flex-basis: 50%;
+}
+.med-row input:last-of-type {
+  flex-basis: 50%;
+}
+
+.remove-med-button {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-weight: bold;
+  line-height: 24px; /* 文字を中央に */
+  padding: 0;
+}
+
+.medication-list {
+  margin-top: 15px;
+}

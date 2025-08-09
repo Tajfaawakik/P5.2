@@ -1,8 +1,8 @@
-import React, { useState, useMemo, useEffect } from 'react'; // <<<--- useEffectをインポート
+import React, { useState, useMemo, useEffect } from 'react';
 import { usePatient } from '../context/PatientContext.jsx';
 import historiesData from '../data/histories.json';
 import medSuggestionsData from '../data/med_suggestions.json';
-import apiClient from '../api/apiClient'; // apiClientをインポート
+import apiClient from '../api/apiClient';
 import './KartePage.css';
 
 // Barthel Indexの評価項目
@@ -22,20 +22,20 @@ const barthelItems = [
 // フォームの初期状態を定義
 const initialPatientInfo = { name: '', age: '', sex: '男性' };
 const initialPastHistory = { selected: [], freeText: '' };
-const initialMedications = [{ name: '', dose: '' }];
+const initialMedications = [];
 const initialBarthelScores = {};
 
 function KartePage() {
-  const { currentPatient } = usePatient(); // <<<--- グローバルな患者情報を取得
-  const [patientInfo, setPatientInfo] = useState({ name: '', age: '', sex: '男性' });
-  const [pastHistory, setPastHistory] = useState({ selected: [], freeText: '' });
-  const [medications, setMedications] = useState([{ name: '', dose: '' }]);
-  const [barthelScores, setBarthelScores] = useState({});
+  const { currentPatient } = usePatient();
+  
+  const [patientInfo, setPatientInfo] = useState(initialPatientInfo);
+  const [pastHistory, setPastHistory] = useState(initialPastHistory);
+  const [medications, setMedications] = useState(initialMedications);
+  const [barthelScores, setBarthelScores] = useState(initialBarthelScores);
   const [generatedMemo, setGeneratedMemo] = useState('');
 
   // 患者が変更されたときにデータを取得する
   useEffect(() => {
-    // フォームをリセットする関数
     const resetForm = () => {
       setPatientInfo(initialPatientInfo);
       setPastHistory(initialPastHistory);
@@ -47,25 +47,21 @@ function KartePage() {
     if (currentPatient) {
       apiClient.get(`/karte/${currentPatient.patient_id}`)
         .then(response => {
-          // データがあればフォームにセット
           const data = response.data.record_data;
           setPatientInfo(data.patientInfo || initialPatientInfo);
           setPastHistory(data.pastHistory || initialPastHistory);
-          setMedications(data.medications && data.medications.length > 0 ? data.medications : initialMedications);
+          setMedications(data.medications || initialMedications);
           setBarthelScores(data.barthelScores || initialBarthelScores);
         })
         .catch(error => {
-          // データがなければ(404 Not Found)、フォームをリセット
           console.log(`患者 ${currentPatient.patient_id} のカルテ記録はありません。`);
           resetForm();
         });
     } else {
-      // 患者が選択されていない場合もリセット
       resetForm();
     }
-  }, [currentPatient]); // currentPatientが変わるたびに実行
+  }, [currentPatient]);
 
-  // 既往歴ボタンのクリック処理
   const toggleHistory = (history) => {
     setPastHistory(prev => {
       const newSelected = prev.selected.includes(history)
@@ -75,22 +71,55 @@ function KartePage() {
     });
   };
   
-  // 薬の入力欄を追加
-  const addMedication = () => setMedications([...medications, { name: '', dose: '' }]);
+  // 候補ボタンで薬剤をトグル（追加/削除）する
+  const toggleMedication = (medName) => {
+    setMedications(prev => {
+      const exists = prev.some(med => med.name === medName);
+      if (exists) {
+        // 存在するなら削除
+        return prev.filter(med => med.name !== medName);
+      } else {
+        // 存在しないなら追加
+        const blankIndex = prev.findIndex(med => med.name === '');
+        // 空の行があれば、そこを埋める
+        if (blankIndex !== -1) {
+          const newMeds = [...prev];
+          newMeds[blankIndex] = { name: medName, dose: '' };
+          return newMeds;
+        }
+        // 空の行がなければ、末尾に追加
+        return [...prev, { name: medName, dose: '' }];
+      }
+    });
+  };
   
-  // 薬の入力内容を更新
+  // 入力欄の値を更新する
   const handleMedicationChange = (index, field, value) => {
     const newMeds = [...medications];
     newMeds[index][field] = value;
     setMedications(newMeds);
   };
+
+  // 空の入力欄を一行だけ追加する
+  const addMedicationRow = () => {
+    // 既に空の行があるかチェック
+    const hasBlankRow = medications.some(med => med.name === '');
+    if (!hasBlankRow) {
+      setMedications([...medications, { name: '', dose: '' }]);
+    }
+  };
   
-  // Barthel Indexのスコアを計算
+  // 指定した行を削除する
+  const removeMedicationRow = (index) => {
+    const newMeds = medications.filter((_, i) => i !== index);
+    setMedications(newMeds);
+  };
+  
+  
   const totalBarthelScore = useMemo(() => {
     return Object.values(barthelScores).reduce((sum, score) => sum + (parseInt(score, 10) || 0), 0);
   }, [barthelScores]);
 
-  // カルテ用メモを生成
   const generateMemo = () => {
     let memo = `【患者情報】\n氏名: ${patientInfo.name}, 年齢: ${patientInfo.age}, 性別: ${patientInfo.sex}\n\n`;
     memo += `【主訴】\n\n\n`;
@@ -104,18 +133,20 @@ function KartePage() {
     setGeneratedMemo(memo);
   };
   
-  // メモをクリップボードにコピー
   const copyMemo = () => {
     navigator.clipboard.writeText(generatedMemo).then(() => {
       alert('カルテ用メモをコピーしました。');
     });
   };
 
-  // サーバーに保存する処理
   const handleSave = async () => {
+    if (!currentPatient) {
+        alert('患者が選択されていません。');
+        return;
+    }
     const dataToSave = {
-      patientId: currentPatient.patient_id, // <<<--- 選択中の患者IDを使用
-      recordData: { // <<<--- record_dataでラップ
+      patientId: currentPatient.patient_id,
+      recordData: {
         patientInfo,
         pastHistory,
         medications,
@@ -132,20 +163,15 @@ function KartePage() {
     }
   };
   
-  
-  // ▼▼▼ 患者が選択されていない場合はメッセージを表示 ▼▼▼
   if (!currentPatient) {
     return <div className="page-prompt">患者を選択してください。</div>;
   }
-
 
   return (
     <div className="karte-container">
       <h2>カルテ記載支援 (App1)</h2>
       <div className="karte-grid">
-        {/* 左側の入力エリア */}
         <div className="input-area">
-          {/* 患者情報 */}
           <section><h3>患者基本情報</h3>
             <input type="text" placeholder="氏名" value={patientInfo.name} onChange={e => setPatientInfo({...patientInfo, name: e.target.value})} />
             <input type="number" placeholder="年齢" value={patientInfo.age} onChange={e => setPatientInfo({...patientInfo, age: e.target.value})} />
@@ -153,7 +179,6 @@ function KartePage() {
               <option>男性</option><option>女性</option>
             </select>
           </section>
-          {/* 既往歴 */}
           <section><h3>既往歴</h3>
             <div className="button-group">
               {historiesData.map(h => 
@@ -162,23 +187,46 @@ function KartePage() {
             </div>
             <textarea placeholder="手術歴など自由記述" rows="2" value={pastHistory.freeText} onChange={e => setPastHistory({...pastHistory, freeText: e.target.value})}></textarea>
           </section>
-          {/* 内服薬 */}
-          <section><h3>内服薬</h3>
-            {pastHistory.selected.length > 0 && <p className="suggestion-guide">候補:</p>}
+          <section>
+            <h3>内服薬</h3>
+            
+            {/* 候補ボタン */}
+            {pastHistory.selected.length > 0 && <p className="suggestion-guide">候補（クリックで追加/削除）:</p>}
             <div className="button-group">
               {pastHistory.selected.flatMap(h => medSuggestionsData[h] || []).map(med =>
-                <button key={med} className="suggestion" onClick={() => handleMedicationChange(medications.length - 1, 'name', med)}>{med}</button>
+                <button 
+                  key={med} 
+                  className={medications.some(m => m.name === med) ? 'active' : ''}
+                  onClick={() => toggleMedication(med)}
+                >
+                  {med}
+                </button>
               )}
             </div>
-            {medications.map((med, index) => (
-              <div key={index} className="med-row">
-                <input type="text" placeholder="薬剤名" value={med.name} onChange={e => handleMedicationChange(index, 'name', e.target.value)} />
-                <input type="text" placeholder="用法・用量" value={med.dose} onChange={e => handleMedicationChange(index, 'dose', e.target.value)} />
-              </div>
-            ))}
-            <button onClick={addMedication}>薬剤を追加</button>
+
+            {/* 薬剤入力欄リスト */}
+            <div className="medication-list">
+              {medications.map((med, index) => (
+                <div key={index} className="med-row">
+                  <input 
+                    type="text" 
+                    placeholder="薬剤名" 
+                    value={med.name} 
+                    onChange={e => handleMedicationChange(index, 'name', e.target.value)} 
+                  />
+                  <input 
+                    type="text" 
+                    placeholder="用法・用量" 
+                    value={med.dose} 
+                    onChange={e => handleMedicationChange(index, 'dose', e.target.value)} 
+                  />
+                  <button className="remove-med-button" onClick={() => removeMedicationRow(index)}>×</button>
+                </div>
+              ))}
+            </div>
+            <button onClick={addMedicationRow}>手動で薬剤を追加</button>
           </section>
-          {/* ADL評価 */}
+          {/* --- ▲▲▲ --- */}
           <section><h3>ADL評価 (Barthel Index) - 合計: {totalBarthelScore}点</h3>
             {barthelItems.map(item => (
               <div key={item.id} className="adl-row">
@@ -191,10 +239,8 @@ function KartePage() {
             ))}
           </section>
         </div>
-        {/* 右側の出力エリア */}
         <div className="output-area">
           <div className="memo-actions">
-              {/* --- ▼▼▼ 「サーバーに保存」ボタンを追記 ▼▼▼ --- */}
             <button onClick={handleSave}>サーバーに保存</button>
             <button onClick={generateMemo}>カルテ用メモを生成</button>
             <button onClick={copyMemo} disabled={!generatedMemo}>クリップボードにコピー</button>
