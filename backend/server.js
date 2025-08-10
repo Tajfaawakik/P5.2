@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+require('dotenv').config(); // <<<--- この行がファイルの先頭付近にあることを確認
 
 // ルーターのインポート
 const authRoutes = require('./routes/auth.js');
