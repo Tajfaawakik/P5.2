@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for models/User.js</title>
+    <title>Code coverage report for models/LabResult.js</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../prettify.css" />
     <link rel="stylesheet" href="../base.css" />
@@ -19,34 +19,34 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../index.html">All files</a> / <a href="index.html">models</a> User.js</h1>
+        <h1><a href="../index.html">All files</a> / <a href="index.html">models</a> LabResult.js</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">80.64% </span>
+                <span class="strong">58.06% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>25/31</span>
+                <span class='fraction'>18/31</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">50% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>2/4</span>
+                <span class='fraction'>1/2</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">50% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>2/2</span>
+                <span class='fraction'>1/2</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">80.64% </span>
+                <span class="strong">58.06% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>25/31</span>
+                <span class='fraction'>18/31</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line medium'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -99,6 +99,18 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -109,51 +121,39 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js">// データベース接続設定をインポート
 const db = require('../config/db.js');
-const bcrypt = require('bcryptjs');
 &nbsp;
-class User {
-  // 新しいユーザーを作成し、データベースに保存
-  static async create(username, passwordHash) {
-    try {
-      const sql = 'INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id, username';
-      const result = await db.query(sql, [username, passwordHash]);
-      return result.rows[0]; // 挿入されたユーザー情報を返す
-    } <span class="branch-0 cbranch-no" title="branch not covered" >catch (error) {</span>
-<span class="cstat-no" title="statement not covered" >      console.error('Error creating user:', error);</span>
+class LabResult {
+  // 新しい採血結果をデータベースに保存
+<span class="fstat-no" title="function not covered" >  static async save(patientId, testDate, results) {</span>
+<span class="cstat-no" title="statement not covered" >    try {</span>
+<span class="cstat-no" title="statement not covered" >      // resultsオブジェクトはJSONB型としてそのまま保存できる</span>
+<span class="cstat-no" title="statement not covered" >      const sql = 'INSERT INTO lab_results (patient_id, test_date, results) VALUES ($1, $2, $3) RETURNING *';</span>
+<span class="cstat-no" title="statement not covered" >      const result = await db.query(sql, [patientId, testDate, results]);</span>
+<span class="cstat-no" title="statement not covered" >      return result.rows[0];</span>
+<span class="cstat-no" title="statement not covered" >    } catch (error) {</span>
+<span class="cstat-no" title="statement not covered" >      console.error('Error saving lab result:', error);</span>
 <span class="cstat-no" title="statement not covered" >      throw error;</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
-  }
+<span class="cstat-no" title="statement not covered" >  }</span>
 &nbsp;
-  // ユーザー名でユーザーをデータベースから検索
-  static async findByUsername(username) {
+  // 患者IDで採血結果をデータベースから検索（検査日の降順で並び替え）
+  static async findByPatientId(patientId) {
     try {
-      const sql = 'SELECT * FROM users WHERE username = $1';
-      const result = await db.query(sql, [username]);
-      return result.rows[0]; // 見つかったユーザー情報（またはundefined）を返す
+      const sql = 'SELECT * FROM lab_results WHERE patient_id = $1 ORDER BY test_date DESC';
+      const result = await db.query(sql, [patientId]);
+      return result.rows; // 見つかった全レコードを配列で返す
     } <span class="branch-0 cbranch-no" title="branch not covered" >catch (error) {</span>
-<span class="cstat-no" title="statement not covered" >      console.error('Error finding user by username:', error);</span>
+<span class="cstat-no" title="statement not covered" >      console.error('Error finding lab results by patient id:', error);</span>
 <span class="cstat-no" title="statement not covered" >      throw error;</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
   }
 }
 &nbsp;
-module.exports = User;</pre></td></tr></table></pre>
+module.exports = LabResult;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->

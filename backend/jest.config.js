@@ -197,4 +197,16 @@ const config = {
   // watchman: true,
 };
 
-module.exports = config;
+// module.exports = config;
+module.exports = {
+  // ...Jest --initで作成された他の設定...
+  
+  clearMocks: true,
+  collectCoverage: true,
+  coverageDirectory: "coverage",
+  coverageProvider: "v8",
+  testEnvironment: "node",
+
+  // ▼▼▼ 以下の一行を追記 ▼▼▼
+  setupFiles: ['./jest.setup.js'],
+};

@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for models/User.js</title>
+    <title>Code coverage report for controllers/shindanController.js</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../prettify.css" />
     <link rel="stylesheet" href="../base.css" />
@@ -19,20 +19,20 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../index.html">All files</a> / <a href="index.html">models</a> User.js</h1>
+        <h1><a href="../index.html">All files</a> / <a href="index.html">controllers</a> shindanController.js</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">80.64% </span>
+                <span class="strong">77.77% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>25/31</span>
+                <span class='fraction'>21/27</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">50% </span>
+                <span class="strong">40% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>2/4</span>
+                <span class='fraction'>2/5</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">80.64% </span>
+                <span class="strong">77.77% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>25/31</span>
+                <span class='fraction'>21/27</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line medium'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -89,12 +89,17 @@
 <a name='L24'></a><a href='#L24'>24</a>
 <a name='L25'></a><a href='#L25'>25</a>
 <a name='L26'></a><a href='#L26'>26</a>
-<a name='L27'></a><a href='#L27'>27</a>
-<a name='L28'></a><a href='#L28'>28</a>
-<a name='L29'></a><a href='#L29'>29</a>
-<a name='L30'></a><a href='#L30'>30</a>
-<a name='L31'></a><a href='#L31'>31</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L27'></a><a href='#L27'>27</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -107,53 +112,36 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js">// データベース接続設定をインポート
-const db = require('../config/db.js');
-const bcrypt = require('bcryptjs');
+<span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js">const ShindanRecord = require('../models/ShindanRecord.js');
 &nbsp;
-class User {
-  // 新しいユーザーを作成し、データベースに保存
-  static async create(username, passwordHash) {
-    try {
-      const sql = 'INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id, username';
-      const result = await db.query(sql, [username, passwordHash]);
-      return result.rows[0]; // 挿入されたユーザー情報を返す
-    } <span class="branch-0 cbranch-no" title="branch not covered" >catch (error) {</span>
-<span class="cstat-no" title="statement not covered" >      console.error('Error creating user:', error);</span>
-<span class="cstat-no" title="statement not covered" >      throw error;</span>
+// 新しい診断記録を保存する処理
+exports.saveShindanRecord = async (req, res) =&gt; {
+  try {
+    const { patientId, recordData } = req.body; // &lt;&lt;&lt;--- 分割代入で受け取る
+    const newRecord = await ShindanRecord.save(patientId, recordData); // &lt;&lt;&lt;--- 引数として渡す
+    res.status(201).json(newRecord);
+  } <span class="branch-0 cbranch-no" title="branch not covered" >catch (error) {</span>
+<span class="cstat-no" title="statement not covered" >    res.status(500).json({ message: 'サーバーエラー', error });</span>
+<span class="cstat-no" title="statement not covered" >  }</span>
+};
+&nbsp;
+// 患者IDで最新の診断記録を1件取得
+exports.getLatestShindanRecord = async (req, res) =&gt; {
+  try {
+    const { patientId } = req.params;
+    const records = await ShindanRecord.findByPatientId(patientId);
+    if (records &amp;&amp; records.length &gt; 0) {
+      res.json(records[0]);
+    }<span class="branch-0 cbranch-no" title="branch not covered" > else {</span>
+<span class="cstat-no" title="statement not covered" >      res.status(404).json({ message: '記録が見つかりません' });</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
-  }
-&nbsp;
-  // ユーザー名でユーザーをデータベースから検索
-  static async findByUsername(username) {
-    try {
-      const sql = 'SELECT * FROM users WHERE username = $1';
-      const result = await db.query(sql, [username]);
-      return result.rows[0]; // 見つかったユーザー情報（またはundefined）を返す
-    } <span class="branch-0 cbranch-no" title="branch not covered" >catch (error) {</span>
-<span class="cstat-no" title="statement not covered" >      console.error('Error finding user by username:', error);</span>
-<span class="cstat-no" title="statement not covered" >      throw error;</span>
-<span class="cstat-no" title="statement not covered" >    }</span>
-  }
-}
-&nbsp;
-module.exports = User;</pre></td></tr></table></pre>
+  } <span class="branch-0 cbranch-no" title="branch not covered" >catch (error) {</span>
+<span class="cstat-no" title="statement not covered" >    res.status(500).json({ message: 'サーバーエラー', error });</span>
+<span class="cstat-no" title="statement not covered" >  }</span>
+};</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
