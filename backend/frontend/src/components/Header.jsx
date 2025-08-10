@@ -1,9 +1,18 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import PatientSelector from './PatientSelector'; // <<<--- インポート
+import { Link, useNavigate } from 'react-router-dom';
+import PatientSelector from './PatientSelector';
+import { useAuth } from '../context/AuthContext.jsx'; // <<<--- インポート
 import './Header.css';
 
 function Header() {
+  const { user, logout } = useAuth(); // <<<--- user情報とlogout関数を取得
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   return (
     <header className="app-header">
       <div className="header-left">
@@ -16,7 +25,12 @@ function Header() {
         </nav>
       </div>
       <div className="header-right">
-        <PatientSelector /> {/* <<<--- ここに配置 */}
+        {/* ▼▼▼ 以下を修正 ▼▼▼ */}
+        <div className="user-info">
+          {user && <span>{user.username} としてログイン中</span>}
+          <button onClick={handleLogout} className="logout-button">ログアウト</button>
+        </div>
+        <PatientSelector />
       </div>
     </header>
   );

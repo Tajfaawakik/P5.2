@@ -6,14 +6,17 @@ import './index.css'
 
 // 作成したPatientProviderをインポート
 import { PatientProvider } from './context/PatientContext.jsx';
+import { AuthProvider } from './context/AuthContext.jsx'; // <<<--- インポート
+
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    {/* PatientProviderで全体を囲む */}
-    <PatientProvider>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </PatientProvider>
+    <BrowserRouter>
+      <AuthProvider> {/* <<<--- AuthProviderを追加 */}
+        <PatientProvider>
+          <App />
+        </PatientProvider>
+      </AuthProvider>
+    </BrowserRouter>
   </React.StrictMode>,
 )

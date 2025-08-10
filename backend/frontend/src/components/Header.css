@@ -37,3 +37,26 @@
 .nav-button:hover {
   background-color: #2980b9;
 }
+
+/* ... */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #ecf0f1;
+}
+
+.logout-button {
+  background-color: #c0392b;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+}
