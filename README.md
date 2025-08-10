@@ -1,5 +1,5 @@
 はい、承知いたしました。
-これまでの全機能と、PostgreSQLデータベースの設定を含めた、最終版のREADME.mdを作成します。
+これまでの全ての開発内容を反映した、最新版のREADME.mdを作成します。
 
 救急初診支援統合アプリ (Emergency Initial Care Support App)
 
@@ -10,17 +10,19 @@
 
 主な機能 ✨
 
-本システムは、以下の4つの主要な支援機能を統合しています。
+本システムは、当初の要件定義書に基づいた機能に加え、開発過程で追加された多くの実用的な機能を備えています。
 
-    カルテ記載支援 (App1): 患者の問診情報を効率的に入力し、サーバーに保存します。患者を選択すると、前回の入力内容が自動で復元されます。
+    認証機能: ログイン・ログアウト機能を備え、保護されたAPIルートにより、許可されたユーザーのみが患者データにアクセスできます。
 
-    症候鑑別支援 (App2): 症候から考えられる鑑別疾患を提示し、診断プロセスを記録・保存します。この機能も患者選択と連動します。
+    患者選択機能: アプリケーション全体で患者情報を共有し、ヘッダーから対象患者を動的に切り替え可能です。新しい患者の登録もここから行えます。
+
+    カルテ記載支援 (App1): 患者の問診情報を効率的に入力・保存します。患者を選択すると、前回の入力内容が自動で復元されます。内服薬は、候補ボタンのクリックで直感的に追加・削除できます。
+
+    症候鑑別支援 (App2): 症候から鑑別疾患を提示し、診断プロセスを記録・保存します。この機能も患者選択と連動し、前回の記録が復元されます。
 
     採血結果入力 (App3): 採血検査の結果を記録・管理し、経時変化を追跡できます。前回値の引用や矢印キーによる高度な入力支援機能を持ちます。
 
     統合記録 (App4): 選択された患者について、各機能で保存された内容を一つのテキストエリアにまとめて表示・コピーできます。
-
-    患者管理: アプリケーション全体で患者情報を共有し、ヘッダーから動的に対象患者を切り替えることができます。
 
 システム構成と技術スタック 🛠️
 
@@ -28,19 +30,27 @@
 
     フロントエンド: React (Vite)
 
-        グローバルな状態管理: React Context API
+        状態管理: React Context API
 
         API通信: Axios
 
         ルーティング: React Router
 
+        トークン解析: jwt-decode
+
     バックエンド: Node.js (Express)
 
         データベース: PostgreSQL
 
-        認証（基礎）: JWT (jsonwebtoken), bcryptjs
+        認証: JWT (jsonwebtoken), bcryptjs
 
-    パッケージ管理: npm
+        環境変数管理: dotenv
+
+    テスト:
+
+        テストフレームワーク: Jest
+
+        APIテスト: Supertest
 
 セットアップ手順 🚀
 
@@ -68,20 +78,23 @@ SQL
 
 -- 1. データベースを作成
 CREATE DATABASE emergency_app;
+CREATE DATABASE emergency_app_test; -- テスト用DB
 
 -- 2. 専用ユーザーを作成 (パスワードは安全なものに変更してください)
 CREATE USER app_user WITH PASSWORD 'mypassword';
 
--- 3. データベースへの全権限を付与
+-- 3. ユーザーに両方のDBへの全権限を付与
 GRANT ALL PRIVILEGES ON DATABASE emergency_app TO app_user;
+GRANT ALL PRIVILEGES ON DATABASE emergency_app_test TO app_user;
 
-次に、作成したユーザーで今作成したデータベースに接続し直し、テーブルを作成します。
+次に、作成したユーザーでそれぞれのデータベースに接続し、テーブルを作成します。
+(まずemergency_appに接続して以下のSQLを実行し、次にemergency_app_testに接続して再度同じSQLを実行します)
 Bash
 
-# app_userでemergency_appデータベースに接続
+# 開発用DBに接続
 psql -h localhost -U app_user -d emergency_app
 
-接続後、以下のSQLを流し込んでテーブルを作成してください。
+接続後、以下のSQLを実行してテーブルを作成してください。
 SQL
 
 CREATE TABLE users (
@@ -122,19 +135,13 @@ CREATE TABLE shindan_records (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 作成したユーザーにスキーマの使用権と作成権を付与
+-- スキーマへの権限付与
 GRANT USAGE, CREATE ON SCHEMA public TO app_user;
 
 4. バックエンドのセットアップ
 
-Bash
-
-# 1. バックエンドのディレクトリに移動
-cd backend
-
-# 2. .envファイルを作成
-#    db.jsがこのファイルを参照してDBに接続します
-#    以下の内容で`.env`という名前のファイルを作成してください
+a. .envファイルの作成
+backendフォルダの直下に.envという名前のファイルを作成し、以下の内容を記述します。
 
 ファイル: backend/.env
 
@@ -145,19 +152,23 @@ DB_PASSWORD=mypassword
 DB_PORT=5432
 JWT_SECRET=your_super_secret_key_for_jwt
 
+b. インストールと起動
 Bash
 
-# 3. 必要なライブラリをインストール
+# 1. バックエンドのディレクトリに移動
+cd backend
+
+# 2. 必要なライブラリをインストール
 npm install
 
-# 4. 開発サーバーを起動
+# 3. 開発サーバーを起動
 npm run dev
 
     サーバーが http://localhost:3001 で起動します。
 
 5. フロントエンドのセットアップ
 
-(バックエンドのターミナルは起動したまま) 新しいターミナルを開いて作業します。
+新しいターミナルを開いて作業します。
 Bash
 
 # 1. フロントエンドのディレクトリに移動
@@ -169,6 +180,20 @@ npm install
 # 3. 開発サーバーを起動
 npm run dev
 
-    package.jsonにはNode.js v17以降で発生するエラーへの対策 (--openssl-legacy-provider) が設定済みです。
     アプリケーションが http://localhost:5173 (または別のポート) で起動し、自動的にブラウザで開きます。
+
+実行方法 🖥️
+
+開発モード
+
+上記の手順でバックエンドとフロントエンドの両方のサーバーを起動すると、アプリケーションにアクセスできます。
+最初は/loginページにリダイレクトされます。curlまたはAPIクライアントで/api/auth/registerを使い、テストユーザーを登録してからログインしてください。
+
+テストの実行
+
+バックエンドのAPIテストを実行するには、backendディレクトリで以下のコマンドを実行します。
+Bash
+
+npm test
+
 
